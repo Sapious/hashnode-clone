@@ -1,6 +1,7 @@
 const userModels = require("../models/user.models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const isEmail = require("validator/lib/isEmail");
 const register = async (req, res) => {
 	try {
 		const existEmail = await userModels.findOne({ email: req.body.email });
@@ -27,8 +28,13 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
+	let existUser = null;
 	try {
-		const existUser = await userModels.findOne({ email: req.body.email });
+		if (isEmail(req.body.loginInfo)) {
+			existUser = await userModels.findOne({ email: req.body.loginInfo });
+		} else {
+			existUser = await userModels.findOne({ username: req.body.loginInfo });
+		}
 
 		if (!existUser) {
 			return res.status(401).json("Wrong Email/Password");

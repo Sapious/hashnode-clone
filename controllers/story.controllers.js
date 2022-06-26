@@ -2,8 +2,9 @@ const storyModels = require("../models/story.models");
 
 const createStory = async (req, res) => {
 	const newStory = new storyModels({
-		// name: req.body.name,
-		// owners: req.verifiedUser._id
+		content: req.body.content,
+		tags: req.body.tags,
+		author: req.verifiedUser._id,
 	});
 	try {
 		const savedStory = await newStory.save();
