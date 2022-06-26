@@ -22,10 +22,6 @@ router.param("comment", async (req, res, next, id) => {
 	}
 });
 
-router.post("/", createComment);
-router.get("/", getComments);
-router.get("/:comment", getComment);
-router.put("/:comment", updateComment);
-router.delete("/:comment", deleteComment);
+
 
 module.exports = router;

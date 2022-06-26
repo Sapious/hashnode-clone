@@ -12,7 +12,7 @@ const StorySchema = new mongoose.Schema(
 		slug: { type: String, maxlength: 1024, unique: true, index: true },
 		content: { type: String },
 		publishedAt: { type: Date },
-		readTime: { type: Number, default: 60 },
+		readTime: { type: Number, default: 1 },
 		tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
 		author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 		blog: { type: mongoose.Schema.Types.ObjectId, ref: "Blog" },
@@ -31,5 +31,11 @@ StorySchema.methods.slugify = function (text) {
 	this.slug =
 		slug(text) + "-" + ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
 };
-
+StorySchema.methods.calculateReadTime = function () {
+	const wordsPerMinute = 200;
+	const noOfWords = this.content.split(/\s/g).length;
+	const minutes = noOfWords / wordsPerMinute;
+	const readTime = Math.ceil(minutes);
+	this.readTime = readTime;
+};
 module.exports = mongoose.model("Story", StorySchema);

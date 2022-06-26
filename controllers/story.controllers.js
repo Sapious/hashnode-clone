@@ -23,17 +23,16 @@ const getStories = async (req, res) => {
 	}
 };
 const getStory = async (req, res) => {
-	const id = req.params.storyId;
+	const story = req.story;
 
 	try {
-		const story = await storyModels.findById(id);
 		return res.status(200).json(story);
 	} catch (err) {
 		return res.status(500).json(err);
 	}
 };
 const deleteStory = async (req, res) => {
-	const id = req.params.storyId;
+	const id = req.story._id;
 	try {
 		const story = await storyModels.findByIdAndDelete(id);
 		return res.status(200).json(story);
@@ -42,7 +41,7 @@ const deleteStory = async (req, res) => {
 	}
 };
 const updateStory = async (req, res) => {
-	const id = req.params.storyId;
+	const id = req.story._id;
 	try {
 		const story = await storyModels.findByIdAndUpdate(id, req.body, {
 			new: true,
@@ -52,9 +51,28 @@ const updateStory = async (req, res) => {
 		return res.status(500).json(err);
 	}
 };
-
+const publishStory = async (req, res) => {
+	const id = req.story._id;
+	try {
+		const story = await storyModels.findByIdAndUpdate(
+			id,
+			{
+				publishAt: Date.now,
+				isDraft: false,
+				blog: req.blog._id,
+			},
+			{
+				new: true,
+			}
+		);
+		return res.status(200).json(story);
+	} catch (err) {
+		return res.status(500).json(err);
+	}
+};
 module.exports.createStory = createStory;
 module.exports.getStories = getStories;
 module.exports.getStory = getStory;
 module.exports.deleteStory = deleteStory;
 module.exports.updateStory = updateStory;
+module.exports.publishStory = publishStory;

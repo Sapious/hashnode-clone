@@ -4,6 +4,7 @@ const {
 	getStories,
 	updateStory,
 	deleteStory,
+	publishStory,
 } = require("../controllers/story.controllers");
 const storyModel = require("../models/story.models");
 const router = require("express").Router();
