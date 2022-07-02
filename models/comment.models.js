@@ -10,4 +10,24 @@ const CommentSchema = new mongoose.Schema(
 	{ timestamps: true }
 );
 
+CommentSchema.pre("findOneAndDelete", function (next) {
+	//TODO: when delete check this function
+	console.log(this);
+	next();
+});
+
+CommentSchema.methods.addReply = async function (id) {
+	if (this.replies.indexOf(id) === -1) {
+		this.replies.push(id);
+	}
+	return await this.save();
+};
+CommentSchema.methods.removeReply = async function (id) {
+	if (this.replies.indexOf(id) !== -1) {
+		this.replies = this.replies.filter((r) => {
+			return r.toString() !== id.toString();
+		});
+	}
+	return await this.save();
+};
 module.exports = mongoose.model("Comment", CommentSchema);

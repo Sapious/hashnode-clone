@@ -2,11 +2,19 @@ const commentModels = require("../models/comment.models");
 
 const createComment = async (req, res) => {
 	const newComment = new commentModels({
-		// name: req.body.name,
-		// owners: req.verifiedUser._id
+		story: req.body.story,
+		content: req.body.content,
+		author: req.verifiedUser._id,
 	});
+	let savedComment = null;
 	try {
-		const savedComment = await newComment.save();
+		if (req.params.comment) {
+			await req.params.comment.addReply(newComment._id);
+			savedComment = req.params.comment;
+		} else {
+			savedComment = await newComment.save();
+		}
+
 		return res.status(200).json(savedComment);
 	} catch (err) {
 		return res.status(500).json(err);

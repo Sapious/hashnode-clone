@@ -57,7 +57,7 @@ const publishStory = async (req, res) => {
 		const story = await storyModels.findByIdAndUpdate(
 			id,
 			{
-				publishAt: Date.now,
+				publishAt: Date.now(),
 				isDraft: false,
 				blog: req.blog._id,
 			},

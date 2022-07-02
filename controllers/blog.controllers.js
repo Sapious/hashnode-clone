@@ -1,6 +1,6 @@
 const blogModels = require("../models/blog.models");
 const userModels = require("../models/user.models");
-
+const storyModels = require("../models/story.models");
 const createBlog = async (req, res) => {
 	const newBlog = new blogModels({
 		name: req.body.name,
@@ -78,6 +78,10 @@ const addOwnerToBlog = async (req, res) => {
 		} else {
 			await blog.addOwner(existUser._id);
 		}
+		await blog.populate({
+			path: "owners",
+			select: "email firstName lastName username avatar",
+		});
 		return res.status(200).json(blog);
 	} catch (err) {
 		return res.status(500).json(err);
@@ -93,11 +97,27 @@ const removeOwnerFromBlog = async (req, res) => {
 		} else {
 			await blog.removeOwner(existUser._id);
 		}
+		await blog.populate({
+			path: "owners",
+			select: "email firstName lastName username avatar",
+		});
 		return res.status(200).json(blog);
 	} catch (err) {
 		return res.status(500).json(err);
 	}
 };
+const getBlogStories = async (req, res) => {
+	const blog = req.blog;
+	try {
+		const stories = await storyModels.find({
+			blog: blog._id,
+		});
+		return res.status(200).json(stories);
+	} catch (err) {
+		return res.status(500).json(err);
+	}
+};
+
 module.exports.createBlog = createBlog;
 module.exports.getBlogs = getBlogs;
 module.exports.getBlog = getBlog;
@@ -106,3 +126,4 @@ module.exports.updateBlog = updateBlog;
 module.exports.getOwnedBlogs = getOwnedBlogs;
 module.exports.addOwnerToBlog = addOwnerToBlog;
 module.exports.removeOwnerFromBlog = removeOwnerFromBlog;
+module.exports.getBlogStories = getBlogStories;

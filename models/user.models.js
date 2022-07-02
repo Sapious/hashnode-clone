@@ -25,6 +25,7 @@ const UserSchema = new mongoose.Schema(
 		},
 		password: { type: String, required: true, maxlength: 4096 },
 		lastLogin: { type: Date, default: Date.now },
+		isAdmin: { type: Boolean, default: false },
 	},
 	{ timestamps: true }
 );

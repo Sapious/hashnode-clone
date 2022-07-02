@@ -7,6 +7,7 @@ const {
 	getOwnedBlogs,
 	addOwnerToBlog,
 	removeOwnerFromBlog,
+	getBlogStories,
 } = require("../controllers/blog.controllers");
 const blogModels = require("../models/blog.models");
 const storyModel = require("../models/story.models");
@@ -55,4 +56,5 @@ router.patch(
 	isStoryOwner,
 	publishStory
 );
+router.get('/:blog/stories', getBlogStories)
 module.exports = router;
