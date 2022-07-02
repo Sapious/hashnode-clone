@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const slug = require("slug");
+const followModels = require("./follow.models");
+const storyModels = require("./story.models");
 const BlogSchema = new mongoose.Schema(
 	{
 		name: {
@@ -15,7 +17,17 @@ const BlogSchema = new mongoose.Schema(
 	},
 	{ timestamps: true }
 );
+BlogSchema.pre("findOneAndDelete", async function (next) {
+	const stories = await storyModels.find({ blog: this.getQuery()["_id"] });
+	for await (const s of stories.map(
+		async (story) => await storyModels.findByIdAndDelete(story._id)
+	));
+	await followModels.deleteMany({
+		following: { entity: this.getQuery()["_id"] },
+	});
 
+	next();
+});
 BlogSchema.pre("validate", function (next) {
 	if (this.name) {
 		this.slugify(this.name);

@@ -22,12 +22,13 @@ const {
 const storyModel = require("../models/story.models");
 const commentModel = require("../models/comment.models");
 const reactionModel = require("../models/reaction.models");
+const verifyToken = require("../middleware/verifyToken");
 const router = require("express").Router();
 
 router.param("story", async (req, res, next, id) => {
 	try {
 		const story = await storyModel.findById(id);
-
+		console.log(story);
 		if (!story) {
 			return res.status(404).json("story not found");
 		}
@@ -67,13 +68,13 @@ router.param("comment", async (req, res, next, id) => {
 	}
 });
 
-router.post("/", createStory);
+router.post("/", verifyToken, createStory);
 router.get("/", getStories);
 router.get("/:story", getStory);
 router.put("/:story", updateStory);
 router.delete("/:story", deleteStory);
 
-router.post("/:story/comments", createComment);
+router.post("/:story/comments", verifyToken, createComment);
 router.post("/:story/comments/:comment", createComment);
 router.get("/:story/comments", getComments);
 router.get("/:story/comments/:comment", getComment);

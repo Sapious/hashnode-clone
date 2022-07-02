@@ -35,7 +35,6 @@ router.param("story", async (req, res, next, id) => {
 		if (!story) {
 			return res.status(404).json("story not found");
 		}
-
 		req.story = story;
 		next();
 	} catch (err) {
@@ -56,5 +55,6 @@ router.patch(
 	isStoryOwner,
 	publishStory
 );
+router.post('/:blog/follow')
 router.get('/:blog/stories', getBlogStories)
 module.exports = router;

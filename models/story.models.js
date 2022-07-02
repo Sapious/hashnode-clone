@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const slug = require("slug");
+const commentModels = require("./comment.models");
+const reactionModels = require("./reaction.models");
 const StorySchema = new mongoose.Schema(
 	{
 		title: {
@@ -20,13 +22,18 @@ const StorySchema = new mongoose.Schema(
 	},
 	{ timestamps: true }
 );
+StorySchema.pre("findOneAndDelete", async function (next) {
+	await commentModels.deleteMany({ story: this.getQuery()["_id"] });
+	await reactionModels.deleteMany({ story: this.getQuery()["_id"] });
+	next();
+});
 StorySchema.pre("validate", function (next) {
+	calculateReadTime();
 	if (this.title) {
 		this.slugify(this.title);
 	}
 	next();
 });
-
 StorySchema.methods.slugify = function (text) {
 	this.slug =
 		slug(text) + "-" + ((Math.random() * Math.pow(36, 6)) | 0).toString(36);

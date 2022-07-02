@@ -2,6 +2,7 @@ const storyModels = require("../models/story.models");
 
 const createStory = async (req, res) => {
 	const newStory = new storyModels({
+		title: req.body.title,
 		content: req.body.content,
 		tags: req.body.tags,
 		author: req.verifiedUser._id,
@@ -45,6 +46,7 @@ const updateStory = async (req, res) => {
 	try {
 		const story = await storyModels.findByIdAndUpdate(id, req.body, {
 			new: true,
+			runValidators: true,
 		});
 		return res.status(200).json(story);
 	} catch (err) {
@@ -57,7 +59,7 @@ const publishStory = async (req, res) => {
 		const story = await storyModels.findByIdAndUpdate(
 			id,
 			{
-				publishAt: Date.now(),
+				publishedAt: Date.now(),
 				isDraft: false,
 				blog: req.blog._id,
 			},
