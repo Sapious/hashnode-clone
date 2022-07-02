@@ -28,7 +28,7 @@ StorySchema.pre("findOneAndDelete", async function (next) {
 	next();
 });
 StorySchema.pre("validate", function (next) {
-	calculateReadTime();
+	
 	if (this.title) {
 		this.slugify(this.title);
 	}
