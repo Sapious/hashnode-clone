@@ -1,5 +1,5 @@
 const storyModels = require("../models/story.models");
-
+const mongoose = require("mongoose");
 const createStory = async (req, res) => {
 	const newStory = new storyModels({
 		title: req.body.title,
@@ -24,7 +24,52 @@ const getStories = async (req, res) => {
 	}
 };
 const getStory = async (req, res) => {
-	const story = req.story;
+	const story = await storyModels.aggregate([
+		{
+			$match: { _id: mongoose.Types.ObjectId(req.story._id) },
+		},
+		{
+			$lookup: {
+				from: "users",
+				localField: "author",
+				foreignField: "_id",
+				as: "author",
+			},
+		},
+		{ $unwind: "$author" },
+
+		{
+			$lookup: {
+				from: "tags",
+				localField: "tags",
+				foreignField: "_id",
+				as: "tags",
+			},
+		},
+		{
+			$lookup: {
+				from: "blogs",
+				localField: "blog",
+				foreignField: "_id",
+				as: "blog",
+			},
+		},
+		{ $unwind: "$blog" },
+		{
+			$project: {
+				"author.password": 0,
+				"blog.owners": 0,
+			},
+		},
+		{
+			$lookup: {
+				from: "reactions",
+				localField: "_id",
+				foreignField: "story",
+				as: "reactions",
+			},
+		},
+	]);
 
 	try {
 		return res.status(200).json(story);

@@ -28,7 +28,7 @@ const router = require("express").Router();
 router.param("story", async (req, res, next, id) => {
 	try {
 		const story = await storyModel.findById(id);
-		console.log(story);
+	
 		if (!story) {
 			return res.status(404).json("story not found");
 		}

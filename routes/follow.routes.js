@@ -1,5 +1,4 @@
 const {
-	createFollow,
 	getFollow,
 	getFollows,
 	updateFollow,
@@ -22,8 +21,6 @@ router.param("follow", async (req, res, next, id) => {
 		return res.status(500).json(err);
 	}
 });
-
-router.post("/", createFollow);
 router.get("/", getFollows);
 router.get("/:follow", getFollow);
 router.put("/:follow", updateFollow);

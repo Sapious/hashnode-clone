@@ -15,6 +15,7 @@ const verifyToken = require("../middleware/verifyToken");
 const isBlogOwner = require("../middleware/isBlogOwner");
 const { publishStory } = require("../controllers/story.controllers");
 const isStoryOwner = require("../middleware/isStoryOwner");
+const { followBlog } = require("../controllers/follow.controllers");
 const router = require("express").Router();
 
 router.param("blog", async (req, res, next, id) => {
@@ -43,7 +44,7 @@ router.param("story", async (req, res, next, id) => {
 });
 router.get("/", getBlogs);
 router.get("/me", verifyToken, getOwnedBlogs);
-router.get("/:blog", getBlog);
+router.get("/:blog",verifyToken, getBlog);
 router.post("/:blog/owners", verifyToken, isBlogOwner, addOwnerToBlog);
 router.patch("/:blog/owners", verifyToken, isBlogOwner, removeOwnerFromBlog);
 router.post("/", verifyToken, createBlog);
@@ -55,6 +56,7 @@ router.patch(
 	isStoryOwner,
 	publishStory
 );
-router.post('/:blog/follow')
-router.get('/:blog/stories', getBlogStories)
+router.post("/:blog/follow");
+router.get("/:blog/stories", getBlogStories);
+router.get("/:blog/follow", verifyToken, followBlog);
 module.exports = router;
