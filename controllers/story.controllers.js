@@ -24,54 +24,95 @@ const getStories = async (req, res) => {
 	}
 };
 const getStory = async (req, res) => {
-	const story = await storyModels.aggregate([
-		{
-			$match: { _id: mongoose.Types.ObjectId(req.story._id) },
-		},
-		{
-			$lookup: {
-				from: "users",
-				localField: "author",
-				foreignField: "_id",
-				as: "author",
-			},
-		},
-		{ $unwind: "$author" },
-
-		{
-			$lookup: {
-				from: "tags",
-				localField: "tags",
-				foreignField: "_id",
-				as: "tags",
-			},
-		},
-		{
-			$lookup: {
-				from: "blogs",
-				localField: "blog",
-				foreignField: "_id",
-				as: "blog",
-			},
-		},
-		{ $unwind: "$blog" },
-		{
-			$project: {
-				"author.password": 0,
-				"blog.owners": 0,
-			},
-		},
-		{
-			$lookup: {
-				from: "reactions",
-				localField: "_id",
-				foreignField: "story",
-				as: "reactions",
-			},
-		},
-	]);
-
 	try {
+		await req.story.updateOne({ $inc: { views: 1 } });
+		const story = await storyModels.aggregate([
+			{
+				$match: { _id: mongoose.Types.ObjectId(req.story._id) },
+			},
+			{
+				$lookup: {
+					from: "users",
+					localField: "author",
+					foreignField: "_id",
+					as: "author",
+				},
+			},
+			{ $unwind: "$author" },
+
+			{
+				$lookup: {
+					from: "tags",
+					localField: "tags",
+					foreignField: "_id",
+					as: "tags",
+				},
+			},
+			{
+				$lookup: {
+					from: "blogs",
+					localField: "blog",
+					foreignField: "_id",
+					as: "blog",
+				},
+			},
+			{ $unwind: "$blog" },
+			{
+				$project: {
+					"author.password": 0,
+					"blog.owners": 0,
+				},
+			},
+			{
+				$lookup: {
+					from: "reactions",
+					let: {
+						storyId: "$_id",
+					},
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$eq: ["$$storyId", "$story"],
+								},
+							},
+						},
+						{
+							$group: {
+								_id: "$emoji",
+
+								count: { $sum: 1 },
+							},
+						},
+					],
+					as: "reactions",
+				},
+			},
+
+			// {
+			// 	$lookup: {
+			// 		from: "bookmarks",
+			// 		let: {
+			// 			storyId: "$_id",
+			// 		},
+			// 		pipeline: [
+			// 			{
+			// 				$match: {
+			// 					$expr: {
+			// 						$and: {
+			// 							$eq: ["$user", mongoose.Types.ObjectId(req.verifiedUser._id)],
+			// 							$eq: ["$$storyId", "$story"],
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 		],
+
+			// 		as: "bookmarked",
+			// 	},
+			// },
+		]);
+
 		return res.status(200).json(story);
 	} catch (err) {
 		return res.status(500).json(err);

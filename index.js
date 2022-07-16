@@ -23,6 +23,7 @@ const routerStory = require("./routes/story.routes");
 const routerReaction = require("./routes/reaction.routes");
 const routerFollow = require("./routes/follow.routes");
 const routerComment = require("./routes/comment.routes");
+const routerFeed = require("./routes/feed.routes");
 //middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -31,6 +32,7 @@ app.use(helmet());
 app.use(compression());
 
 //routes middleware
+app.use("/api/feed", routerFeed);
 app.use("/api/auth", routerAuth);
 app.use("/api/users", routerUser);
 app.use("/api/blogs", routerBlog);

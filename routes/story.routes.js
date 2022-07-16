@@ -23,12 +23,16 @@ const storyModel = require("../models/story.models");
 const commentModel = require("../models/comment.models");
 const reactionModel = require("../models/reaction.models");
 const verifyToken = require("../middleware/verifyToken");
+const {
+	bookmarkStory,
+	unbookmarkStory,
+} = require("../controllers/bookmark.controllers");
 const router = require("express").Router();
 
 router.param("story", async (req, res, next, id) => {
 	try {
 		const story = await storyModel.findById(id);
-	
+
 		if (!story) {
 			return res.status(404).json("story not found");
 		}
@@ -74,6 +78,9 @@ router.get("/:story", getStory);
 router.put("/:story", updateStory);
 router.delete("/:story", deleteStory);
 
+router.post("/:story/bookmark", verifyToken, bookmarkStory);
+router.delete("/:story/unbookmark", verifyToken, unbookmarkStory);
+
 router.post("/:story/comments", verifyToken, createComment);
 router.post("/:story/comments/:comment", createComment);
 router.get("/:story/comments", getComments);
@@ -81,7 +88,7 @@ router.get("/:story/comments/:comment", getComment);
 router.put("/:story/comments/:comment", updateComment);
 router.delete("/:story/comments/:comment", deleteComment);
 
-router.post("/:story/reactions", createReaction);
+router.post("/:story/reactions", verifyToken, createReaction);
 router.get("/:story/reactions", getReactions);
 router.get("/:story/reactions/:reaction", getReaction);
 router.put("/:story/reactions/:reaction", updateReaction);

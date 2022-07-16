@@ -40,7 +40,7 @@ const followTag = async (req, res) => {
 				follower: req.verifiedUser._id,
 				following: {
 					entity: req.tag._id,
-					model: "Blog",
+					model: "Tag",
 				},
 			});
 

@@ -1,9 +1,9 @@
 const tagModels = require("../models/tag.models");
-
+const mongoose = require("mongoose");
 const createTag = async (req, res) => {
 	const newTag = new tagModels({
-		// name: req.body.name,
-		// owners: req.verifiedUser._id
+		name: req.body.name,
+		owners: req.body.icon,
 	});
 	try {
 		const savedTag = await newTag.save();
@@ -22,10 +22,49 @@ const getTags = async (req, res) => {
 	}
 };
 const getTag = async (req, res) => {
-	const id = req.params.tagId;
-
 	try {
-		const tag = await tagModels.findById(id);
+		const tag = await tagModels.aggregate([
+			{
+				$match: { _id: mongoose.Types.ObjectId(req.tag._id) },
+			},
+			{
+				$lookup: {
+					from: "follows",
+					let: {
+						tagId: "$_id",
+					},
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: {
+										$eq: ["$$tagId", "$following.entity"],
+										$eq: ["$following.model", "Tag"],
+									},
+								},
+							},
+						},
+					],
+
+					as: "followers",
+				},
+			},
+			{
+				$addFields: { followers: { $size: "$followers" } },
+			},
+
+			{
+				$lookup: {
+					from: "stories",
+					localField: "_id",
+					foreignField: "tags",
+					as: "stories",
+				},
+			},
+			{
+				$addFields: { stories: { $size: "$stories" } },
+			},
+		]);
 		return res.status(200).json(tag);
 	} catch (err) {
 		return res.status(500).json(err);

@@ -2,8 +2,9 @@ const reactionModels = require("../models/reaction.models");
 
 const createReaction = async (req, res) => {
 	const newReaction = new reactionModels({
-		// name: req.body.name,
-		// owners: req.verifiedUser._id
+		emoji: req.body.emoji,
+		user: req.verifiedUser._id,
+		story: req.story._id,
 	});
 	try {
 		const savedReaction = await newReaction.save();
@@ -15,14 +16,14 @@ const createReaction = async (req, res) => {
 
 const getReactions = async (req, res) => {
 	try {
-		const reactions = await reactionModels.find();
+		const reactions = await reactionModels.find({ story: req.story._id });
 		return res.status(200).json(reactions);
 	} catch (err) {
 		return res.status(500).json(err);
 	}
 };
 const getReaction = async (req, res) => {
-	const id = req.params.reactionId;
+	const id = req.params.reaction;
 
 	try {
 		const reaction = await reactionModels.findById(id);
@@ -32,7 +33,7 @@ const getReaction = async (req, res) => {
 	}
 };
 const deleteReaction = async (req, res) => {
-	const id = req.params.reactionId;
+	const id = req.params.reaction;
 	try {
 		const reaction = await reactionModels.findByIdAndDelete(id);
 		return res.status(200).json(reaction);
@@ -41,7 +42,7 @@ const deleteReaction = async (req, res) => {
 	}
 };
 const updateReaction = async (req, res) => {
-	const id = req.params.reactionId;
+	const id = req.params.reaction;
 	try {
 		const reaction = await reactionModels.findByIdAndUpdate(id, req.body, {
 			new: true,
