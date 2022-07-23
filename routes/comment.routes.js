@@ -1,13 +1,12 @@
 
 const commentModel = require("../models/comment.models");
+const replyModel = require("../models/reply.models");
 const router = require("express").Router();
-// const {
-// 	createReply,
-// 	getReply,
-// 	getReplies,
-// 	deleteReply,
-// 	updateReply,
-// } = require("../controllers/comment.controllers");
+ const {
+	createReply,
+	deleteReply,
+	updateReply,
+ } = require("../controllers/reply.controllers");
 router.param("comment", async (req, res, next, id) => {
 	try {
 		const comment = await commentModel.findById(id);
@@ -21,21 +20,20 @@ router.param("comment", async (req, res, next, id) => {
 		return res.status(500).json(err);
 	}
 });
-router.param("comment", async (req, res, next, id) => {
+router.param("reply", async (req, res, next, id) => {
 	try {
-		const comment = await commentModel.findById(id);
+		const reply = await replyModel.findById(id);
 
-		if (!comment) {
-			return res.status(404).json("comment not found");
+		if (!reply) {
+			return res.status(404).json("reply not found");
 		}
-		req.comment = comment;
+		req.reply = reply;
 		next();
 	} catch (err) {
 		return res.status(500).json(err);
 	}
 });
-// router.post("/:comment/replies", createReply);
-// router.get("/:comment/replies", getReplies);
-// router.delete("/:comment/replies/:reply", deleteReply);
-
+router.post("/:comment/replies", createReply);
+router.delete("/:comment/replies/:reply", deleteReply);
+router.put("/:comment/replies/:reply", updateReply);
 module.exports = router;

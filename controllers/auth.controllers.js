@@ -10,6 +10,8 @@ const Redis = require("ioredis");
 const redisIO = new Redis({
 	port: process.env.REDIS_PORT,
 	host: process.env.REDIS_HOST,
+	username: process.env.REDIS_NAME,
+	password: process.env.REDIS_PASSWORD,
 });
 const register = async (req, res) => {
 	try {
@@ -52,10 +54,12 @@ const login = async (req, res) => {
 				email: existUser.email,
 				username: existUser.username,
 				isAdmin: existUser.isAdmin,
+				isEmailVerified: existUser.isEmailVerified,
 			},
 			process.env.TOKEN_KEY,
 			{ expiresIn: "2 days" }
 		);
+		redisIO.set(token, existUser._id, "ex", 3600 * 48);
 		existUser.lastLogin = Date.now();
 		await existUser.save();
 		return res.status(200).json({ user: existUser, token: token });
@@ -122,12 +126,12 @@ const forgotPassword = async (req, res) => {
 
 		redisIO.set(code, existUser.email, "ex", 3600);
 
-		await transporter.sendMail({
-			from: "clone@hashnode.com", // sender address
-			to: existUser.email, // list of receivers
-			subject: "reset password ✔", // Subject line
-			text: "Hello world?", // plain text body
-			html: `this is your code: ${code}`, // html body
+		emailQueue.add(SEND_FORGOT_PASSWORD_EMAIL, {
+			from: "clone@hashnode.com",
+			to: existUser.email,
+			subject: "reset password ✔",
+			text: "Hello world?",
+			html: `this is your code: ${code}`,
 		});
 		return res
 			.status(202)

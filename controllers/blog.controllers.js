@@ -2,7 +2,8 @@ const blogModels = require("../models/blog.models");
 const userModels = require("../models/user.models");
 const storyModels = require("../models/story.models");
 const followModels = require("../models/follow.models");
-const { default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
+const blogpipe = require("../pipelines/blog.pipelines");
 const createBlog = async (req, res) => {
 	const newBlog = new blogModels({
 		name: req.body.name,
@@ -28,73 +29,7 @@ const getBlog = async (req, res) => {
 	let blog = null;
 
 	if (req.verifiedUser) {
-		blog = await blogModels.aggregate([
-			{
-				$match: { _id: mongoose.Types.ObjectId(req.blog._id) },
-			},
-			{
-				$lookup: {
-					from: "users",
-					localField: "owners",
-					foreignField: "_id",
-					as: "owners",
-				},
-			},
-			{
-				$unwind: "$owners",
-			},
-			{
-				$project: {
-					"owners.password": 0,
-				},
-			},
-			{
-				$lookup: {
-					from: "follows",
-					let: {
-						blogId: "$_id",
-					},
-					pipeline: [
-						{
-							$match: {
-								$expr: {
-									$and: {
-										$eq: [
-											"$follower",
-											mongoose.Types.ObjectId(req.verifiedUser._id),
-										],
-										$eq: ["$$blogId", "$following.entity"],
-										$eq: ["$following.model", "Blog"],
-									},
-								},
-							},
-						},
-					],
-
-					as: "followers",
-				},
-			},
-			{
-				$addFields: {
-					followers: { $size: "$followers" },
-				},
-			},
-			{
-				$addFields: {
-					canFollow: {
-						$switch: {
-							branches: [
-								{ case: { $eq: ["$followers", 1] }, then: false },
-								{ case: { $eq: ["$followers", 0] }, then: true },
-							],
-						},
-					},
-				},
-			},
-			{
-				$unset: "followers",
-			},
-		]);
+		blog = await blogpipe(req.blog._id, req.verifiedUser);
 	} else {
 		blog = await blogModels.aggregate([
 			{
