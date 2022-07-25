@@ -43,7 +43,7 @@ app.use("/api/reactions", routerReaction);
 app.use("/api/follows", routerFollow);
 app.use("/api/comments", routerComment);
 //server listening
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 app.listen(port, () => {
 	console.log(`Example app listening on port ${port}`);
